@@ -1,5 +1,6 @@
 package com.example.pocketledger.ui.dashboard
 
+import com.example.pocketledger.BuildConfig
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pocketledger.data.model.Account
@@ -30,11 +31,14 @@ class DashboardViewModel @Inject constructor(
 
     val totalBalance: StateFlow<BigDecimal> = accounts.combine(accounts) { accs, _ ->
         accs.fold(BigDecimal.ZERO) { sum, account -> sum.add(account.balance) }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BigDecimal.ZERO)
+    }.stateIn(viewModelScope, SharingStarted.While Subscribed(5000), BigDecimal.ZERO)
 
     fun generateSampleData() {
-        viewModelScope.launch {
-            dataSeeder.seedData()
+        // Only allow in debug builds
+        if (BuildConfig.DEBUG) {
+            viewModelScope.launch {
+                dataSeeder.seedData()
+            }
         }
     }
 }

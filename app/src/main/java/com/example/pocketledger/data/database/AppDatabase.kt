@@ -40,41 +40,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun loanDao(): LoanDao
     abstract fun recurringRuleDao(): RecurringRuleDao
 
-    companion object {
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context, passphrase: String): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = createDatabase(context, passphrase)
-                INSTANCE = instance
-                instance
-            }
-        }
-
-        private fun createDatabase(context: Context, passphrase: String): AppDatabase {
-            // Load SQLCipher native library
-            System.loadLibrary("sqlcipher")
-            
-            // Use SQLCipher for encryption
-            val passphraseByteArray = SQLiteDatabase.getBytes(passphrase.toCharArray())
-            val factory = SupportFactory(passphraseByteArray)
-
-            return Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java,
-                "pocket_ledger_database"
-            )
-                .openHelperFactory(factory)
-                .fallbackToDestructiveMigration()
-                .build()
-        }
-
-        // Migration for future schema changes
-        val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                // Add future migrations here
-            }
-        }
-    }
 }

@@ -42,7 +42,9 @@ import java.util.UUID
     indices = [
         Index(value = ["fromAccountId"]),
         Index(value = ["toAccountId"]),
-        Index(value = ["dateTime"], orders = [Index.Order.DESC])
+        Index(value = ["dateTime"], orders = [Index.Order.DESC]),
+        Index(value = ["category"]),
+        Index(value = ["direction"])
     ]
 )
 data class Transaction(

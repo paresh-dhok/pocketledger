@@ -7,12 +7,12 @@ import com.example.pocketledger.data.dao.AccountDao
 import com.example.pocketledger.data.dao.LoanDao
 import com.example.pocketledger.data.dao.RecurringRuleDao
 import com.example.pocketledger.data.dao.TransactionDao
+import com.example.pocketledger.security.KeystoreManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import net.zetetic.database.sqlcipher.SQLiteDatabase
 import net.zetetic.database.sqlcipher.SupportFactory
 import javax.inject.Singleton
 
@@ -22,10 +22,16 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        // Initialize SQLCipher with a secure passphrase
-        // In production, this should be managed through Android Keystore
-        val passphrase = SQLiteDatabase.getBytes("pocketledger-secure-key-2024".toCharArray())
+    fun provideKeystoreManager(): KeystoreManager = KeystoreManager()
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(
+        @ApplicationContext context: Context,
+        keystoreManager: KeystoreManager
+    ): AppDatabase {
+        // Use Android Keystore for secure encryption key management
+        val passphrase = keystoreManager.getDatabaseKey()
         val factory = SupportFactory(passphrase)
 
         return Room.databaseBuilder(

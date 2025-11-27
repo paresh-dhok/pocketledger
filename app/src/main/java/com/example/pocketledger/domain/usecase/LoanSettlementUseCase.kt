@@ -66,3 +66,5 @@ class LoanSettlementUseCase @Inject constructor(
         }
     }
 }
+
+class InvalidLoanSettlementException(message: String) : Exception(message)

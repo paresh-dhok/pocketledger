@@ -5,6 +5,8 @@ import com.example.pocketledger.data.dao.CategorySpending
 import com.example.pocketledger.data.dao.DailyBalance
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface TransactionRepository {
     fun getAllTransactions(): Flow<List<Transaction>>
@@ -94,16 +96,15 @@ class TransactionRepositoryImpl @Inject constructor(
             throw DuplicateTransactionException("Possible duplicate transaction detected")
         }
         
-        // Balance updates are now handled by ProcessTransactionUseCase only
-        // No manual balance updates here to avoid double accounting
+        // Balance updates are handled by ProcessTransactionUseCase only
         transactionDao.insertTransaction(transaction)
     }
     
     override suspend fun updateTransaction(transaction: Transaction) = transactionDao.updateTransaction(transaction)
     
     override suspend fun deleteTransaction(transaction: Transaction) {
-        // Balance updates are now handled by ProcessTransactionUseCase only
-        // No manual balance updates here to avoid double accounting
+        // Balance updates are handled by ReverseTransactionUseCase only
+        // This method should only be called via ReverseTransactionUseCase
         transactionDao.deleteTransaction(transaction)
     }
     
