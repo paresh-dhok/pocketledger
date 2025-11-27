@@ -40,10 +40,10 @@ jobs:
 
     - name: Generate Gradle Wrapper
       run: |
-        curl -L https://services.gradle.org/distributions/gradle-8.0-bin.zip -o gradle.zip
+        curl -L https://services.gradle.org/distributions/gradle-8.9-bin.zip -o gradle.zip
         unzip gradle.zip
-        ./gradle-8.0/bin/gradle wrapper --gradle-version 8.0
-        rm -rf gradle.zip gradle-8.0
+        ./gradle-8.9/bin/gradle wrapper --gradle-version 8.9
+        rm -rf gradle.zip gradle-8.9
 
     - name: Build Debug APK
       run: ./gradlew assembleDebug
