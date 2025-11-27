@@ -5,43 +5,81 @@ import com.example.pocketledger.data.dao.CategorySpending
 import com.example.pocketledger.data.dao.DailyBalance
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
-import javax.inject.Inject
-import javax.inject.Singleton
+
+interface TransactionRepository {
+    fun getAllTransactions(): Flow<List<Transaction>>
+    
+    fun getTransactionsByAccount(accountId: String): Flow<List<Transaction>>
+    
+    fun getTransactionsByCategory(category: String): Flow<List<Transaction>>
+    
+    fun getTransactionsByCounterparty(counterparty: String): Flow<List<Transaction>>
+    
+    fun getTransactionsByDateRange(startDate: LocalDateTime, endDate: LocalDateTime): Flow<List<Transaction>>
+    
+    fun getTransactionsByDirection(direction: Transaction.TransactionDirection): Flow<List<Transaction>>
+    
+    fun searchTransactions(query: String): Flow<List<Transaction>>
+    
+    fun getTransactionsByLoanId(loanId: String): Flow<List<Transaction>>
+    
+    fun getTransactionsByTag(tag: String): Flow<List<Transaction>>
+    
+    suspend fun getTransactionById(id: String): Transaction?
+    
+    suspend fun insertTransaction(transaction: Transaction)
+    
+    suspend fun updateTransaction(transaction: Transaction)
+    
+    suspend fun deleteTransaction(transaction: Transaction)
+    
+    suspend fun deleteTransactionById(id: String)
+    
+    suspend fun getTotalIncome(startDate: LocalDateTime, endDate: LocalDateTime): Double
+    
+    suspend fun getTotalExpense(startDate: LocalDateTime, endDate: LocalDateTime): Double
+    
+    suspend fun getExpenseByCategory(startDate: LocalDateTime, endDate: LocalDateTime): List<CategorySpending>
+    
+    suspend fun getBalanceOverTime(startDate: LocalDateTime, endDate: LocalDateTime): List<DailyBalance>
+    
+    fun getLoanSettlementTransactions(): Flow<List<Transaction>>
+}
 
 @Singleton
-class TransactionRepository @Inject constructor(
+class TransactionRepositoryImpl @Inject constructor(
     private val transactionDao: com.example.pocketledger.data.dao.TransactionDao,
     private val accountDao: com.example.pocketledger.data.dao.AccountDao
-) {
-    fun getAllTransactions(): Flow<List<Transaction>> = transactionDao.getAllTransactions()
+) : TransactionRepository {
+    override fun getAllTransactions(): Flow<List<Transaction>> = transactionDao.getAllTransactions()
     
-    fun getTransactionsByAccount(accountId: String): Flow<List<Transaction>> = 
+    override fun getTransactionsByAccount(accountId: String): Flow<List<Transaction>> = 
         transactionDao.getTransactionsByAccount(accountId)
     
-    fun getTransactionsByCategory(category: String): Flow<List<Transaction>> = 
+    override fun getTransactionsByCategory(category: String): Flow<List<Transaction>> = 
         transactionDao.getTransactionsByCategory(category)
     
-    fun getTransactionsByCounterparty(counterparty: String): Flow<List<Transaction>> = 
+    override fun getTransactionsByCounterparty(counterparty: String): Flow<List<Transaction>> = 
         transactionDao.getTransactionsByCounterparty(counterparty)
     
-    fun getTransactionsByDateRange(startDate: LocalDateTime, endDate: LocalDateTime): Flow<List<Transaction>> = 
+    override fun getTransactionsByDateRange(startDate: LocalDateTime, endDate: LocalDateTime): Flow<List<Transaction>> = 
         transactionDao.getTransactionsByDateRange(startDate, endDate)
     
-    fun getTransactionsByDirection(direction: Transaction.TransactionDirection): Flow<List<Transaction>> = 
+    override fun getTransactionsByDirection(direction: Transaction.TransactionDirection): Flow<List<Transaction>> = 
         transactionDao.getTransactionsByDirection(direction)
     
-    fun searchTransactions(query: String): Flow<List<Transaction>> = 
+    override fun searchTransactions(query: String): Flow<List<Transaction>> = 
         transactionDao.searchTransactions(query)
     
-    fun getTransactionsByLoanId(loanId: String): Flow<List<Transaction>> = 
+    override fun getTransactionsByLoanId(loanId: String): Flow<List<Transaction>> = 
         transactionDao.getTransactionsByLoanId(loanId)
     
-    fun getTransactionsByTag(tag: String): Flow<List<Transaction>> = 
+    override fun getTransactionsByTag(tag: String): Flow<List<Transaction>> = 
         transactionDao.getTransactionsByTag(tag)
     
-    suspend fun getTransactionById(id: String): Transaction? = transactionDao.getTransactionById(id)
+    override suspend fun getTransactionById(id: String): Transaction? = transactionDao.getTransactionById(id)
     
-    suspend fun insertTransaction(transaction: Transaction) {
+    override suspend fun insertTransaction(transaction: Transaction) {
         // Check for duplicates within 30 seconds
         val thirtySecondsAgo = transaction.dateTime.minusSeconds(30)
         val duplicateCount = transactionDao.checkDuplicateTransaction(
@@ -56,68 +94,37 @@ class TransactionRepository @Inject constructor(
             throw DuplicateTransactionException("Possible duplicate transaction detected")
         }
         
-        // Update account balances
-        when (transaction.direction) {
-            Transaction.TransactionDirection.EXPENSE -> {
-                accountDao.updateBalance(transaction.fromAccountId, -transaction.amount)
-            }
-            Transaction.TransactionDirection.INCOME -> {
-                accountDao.updateBalance(transaction.fromAccountId, transaction.amount)
-            }
-            Transaction.TransactionDirection.TRANSFER -> {
-                accountDao.updateBalance(transaction.fromAccountId, -transaction.amount)
-                transaction.toAccountId?.let { toId ->
-                    accountDao.updateBalance(toId, transaction.amount)
-                }
-            }
-        }
-        
+        // Balance updates are now handled by ProcessTransactionUseCase only
+        // No manual balance updates here to avoid double accounting
         transactionDao.insertTransaction(transaction)
     }
     
-    suspend fun updateTransaction(transaction: Transaction) = transactionDao.updateTransaction(transaction)
+    override suspend fun updateTransaction(transaction: Transaction) = transactionDao.updateTransaction(transaction)
     
-    suspend fun deleteTransaction(transaction: Transaction) {
-        // Reverse the balance changes
-        when (transaction.direction) {
-            Transaction.TransactionDirection.EXPENSE -> {
-                accountDao.updateBalance(transaction.fromAccountId, transaction.amount)
-            }
-            Transaction.TransactionDirection.INCOME -> {
-                accountDao.updateBalance(transaction.fromAccountId, -transaction.amount)
-            }
-            Transaction.TransactionDirection.TRANSFER -> {
-                accountDao.updateBalance(transaction.fromAccountId, transaction.amount)
-                transaction.toAccountId?.let { toId ->
-                    accountDao.updateBalance(toId, -transaction.amount)
-                }
-            }
-        }
-        
+    override suspend fun deleteTransaction(transaction: Transaction) {
+        // Balance updates are now handled by ProcessTransactionUseCase only
+        // No manual balance updates here to avoid double accounting
         transactionDao.deleteTransaction(transaction)
     }
     
-    suspend fun deleteTransactionById(id: String) {
+    override suspend fun deleteTransactionById(id: String) {
         getTransactionById(id)?.let { deleteTransaction(it) }
     }
     
-    suspend fun getTotalIncome(startDate: LocalDateTime, endDate: LocalDateTime): Double = 
+    override suspend fun getTotalIncome(startDate: LocalDateTime, endDate: LocalDateTime): Double = 
         transactionDao.getTotalIncome(startDate, endDate)
     
-    suspend fun getTotalExpense(startDate: LocalDateTime, endDate: LocalDateTime): Double = 
+    override suspend fun getTotalExpense(startDate: LocalDateTime, endDate: LocalDateTime): Double = 
         transactionDao.getTotalExpense(startDate, endDate)
     
-    suspend fun getExpenseByCategory(startDate: LocalDateTime, endDate: LocalDateTime): List<CategorySpending> = 
+    override suspend fun getExpenseByCategory(startDate: LocalDateTime, endDate: LocalDateTime): List<CategorySpending> = 
         transactionDao.getExpenseByCategory(startDate, endDate)
     
-    suspend fun getBalanceOverTime(startDate: LocalDateTime, endDate: LocalDateTime): List<DailyBalance> = 
+    override suspend fun getBalanceOverTime(startDate: LocalDateTime, endDate: LocalDateTime): List<DailyBalance> = 
         transactionDao.getBalanceOverTime(startDate, endDate)
     
-    fun getLoanSettlementTransactions(): Flow<List<Transaction>> = 
+    override fun getLoanSettlementTransactions(): Flow<List<Transaction>> = 
         transactionDao.getLoanSettlementTransactions()
-    
-    fun getTransactionsByLoanId(loanId: String): Flow<List<Transaction>> = 
-        transactionDao.getTransactionsByLoanId(loanId)
 }
 
 class DuplicateTransactionException(message: String) : Exception(message)

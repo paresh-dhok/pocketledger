@@ -4,42 +4,75 @@ import com.example.pocketledger.data.model.LoanRecord
 import com.example.pocketledger.data.model.Transaction
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
-import javax.inject.Inject
-import javax.inject.Singleton
+
+interface LoanRepository {
+    fun getAllLoans(): Flow<List<LoanRecord>>
+    
+    fun getActiveLoans(): Flow<List<LoanRecord>>
+    
+    fun getLoansByType(type: LoanRecord.LoanType): Flow<List<LoanRecord>>
+    
+    fun getLoansByCounterparty(counterparty: String): Flow<List<LoanRecord>>
+    
+    suspend fun getLoanById(id: String): LoanRecord?
+    
+    suspend fun insertLoan(loan: LoanRecord)
+    
+    suspend fun updateLoan(loan: LoanRecord)
+    
+    suspend fun deleteLoan(loan: LoanRecord)
+    
+    suspend fun deleteLoanById(loanId: String)
+    
+    suspend fun makeLoanPayment(loanId: String, paymentAmount: Double, paymentTransaction: Transaction)
+    
+    suspend fun updateOutstandingAmount(loanId: String, newAmount: Double)
+    
+    suspend fun getTotalOutstandingByType(type: LoanRecord.LoanType): Double
+    
+    suspend fun createLoan(
+        counterparty: String,
+        amount: Double,
+        type: LoanRecord.LoanType,
+        relatedTransactionId: String? = null
+    ): LoanRecord
+        
+    suspend fun settleLoan(loanId: String): Transaction?
+}
 
 @Singleton
-class LoanRepository @Inject constructor(
+class LoanRepositoryImpl @Inject constructor(
     private val loanDao: com.example.pocketledger.data.dao.LoanDao,
     private val transactionDao: com.example.pocketledger.data.dao.TransactionDao
-) {
-    fun getAllLoans(): Flow<List<LoanRecord>> = loanDao.getAllLoans()
+) : LoanRepository {
+    override fun getAllLoans(): Flow<List<LoanRecord>> = loanDao.getAllLoans()
     
-    fun getActiveLoans(): Flow<List<LoanRecord>> = loanDao.getActiveLoans()
+    override fun getActiveLoans(): Flow<List<LoanRecord>> = loanDao.getActiveLoans()
     
-    fun getLoansByType(type: LoanRecord.LoanType): Flow<List<LoanRecord>> = 
+    override fun getLoansByType(type: LoanRecord.LoanType): Flow<List<LoanRecord>> = 
         loanDao.getLoansByType(type)
     
-    fun getLoansByCounterparty(counterparty: String): Flow<List<LoanRecord>> = 
+    override fun getLoansByCounterparty(counterparty: String): Flow<List<LoanRecord>> = 
         loanDao.getLoansByCounterparty(counterparty)
     
-    suspend fun getLoanById(id: String): LoanRecord? {
+    override suspend fun getLoanById(id: String): LoanRecord? {
         return loanDao.getLoanById(id)
     }
     
-    suspend fun insertLoan(loan: LoanRecord) = loanDao.insertLoan(loan)
+    override suspend fun insertLoan(loan: LoanRecord) = loanDao.insertLoan(loan)
     
-    suspend fun updateLoan(loan: LoanRecord) = loanDao.updateLoan(loan)
+    override suspend fun updateLoan(loan: LoanRecord) = loanDao.updateLoan(loan)
     
-    suspend fun deleteLoan(loan: LoanRecord) {
+    override suspend fun deleteLoan(loan: LoanRecord) {
         loanDao.deleteLoan(loan)
     }
     
-    suspend fun deleteLoanById(loanId: String) {
+    override suspend fun deleteLoanById(loanId: String) {
         val loan = getLoanById(loanId) ?: return
         deleteLoan(loan)
     }
     
-    suspend fun makeLoanPayment(loanId: String, paymentAmount: Double, paymentTransaction: Transaction) {
+    override suspend fun makeLoanPayment(loanId: String, paymentAmount: Double, paymentTransaction: Transaction) {
         val loan = getLoanById(loanId) ?: throw IllegalArgumentException("Loan not found")
         
         if (paymentAmount > loan.outstandingAmount) {
@@ -66,16 +99,16 @@ class LoanRepository @Inject constructor(
         transactionDao.updateTransaction(updatedTransaction)
     }
     
-    suspend fun updateOutstandingAmount(loanId: String, newAmount: Double) {
+    override suspend fun updateOutstandingAmount(loanId: String, newAmount: Double) {
         val loan = getLoanById(loanId) ?: return
         val updatedLoan = loan.copy(outstandingAmount = newAmount)
         updateLoan(updatedLoan)
     }
     
-    suspend fun getTotalOutstandingByType(type: LoanRecord.LoanType): Double = 
+    override suspend fun getTotalOutstandingByType(type: LoanRecord.LoanType): Double = 
         loanDao.getTotalOutstandingByType(type)
     
-    suspend fun createLoan(
+    override suspend fun createLoan(
         counterparty: String,
         amount: Double,
         type: LoanRecord.LoanType,
@@ -92,8 +125,7 @@ class LoanRepository @Inject constructor(
         return loan
     }
     
-        
-    suspend fun settleLoan(loanId: String): Transaction? {
+    override suspend fun settleLoan(loanId: String): Transaction? {
         val loan = getLoanById(loanId) ?: throw IllegalArgumentException("Loan not found")
         
         if (loan.outstandingAmount <= 0) {
@@ -116,7 +148,4 @@ class LoanRepository @Inject constructor(
         
         return settlementTransaction
     }
-    
-    fun getTransactionsByLoanId(loanId: String): Flow<List<Transaction>> = 
-        transactionDao.getTransactionsByLoanId(loanId)
 }

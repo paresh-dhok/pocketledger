@@ -17,8 +17,8 @@ import com.example.pocketledger.data.model.RecurringRule
 import com.example.pocketledger.data.model.Transaction
 import com.example.pocketledger.data.database.converters.DateConverters
 import com.example.pocketledger.data.database.converters.ListConverters
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SQLiteDatabase
+import net.zetetic.database.sqlcipher.SupportFactory
 
 @Database(
     entities = [
@@ -53,6 +53,9 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         private fun createDatabase(context: Context, passphrase: String): AppDatabase {
+            // Load SQLCipher native library
+            System.loadLibrary("sqlcipher")
+            
             // Use SQLCipher for encryption
             val passphraseByteArray = SQLiteDatabase.getBytes(passphrase.toCharArray())
             val factory = SupportFactory(passphraseByteArray)
