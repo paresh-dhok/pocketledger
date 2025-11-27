@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.example.pocketledger"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.pocketledger"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
