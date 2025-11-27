@@ -2,8 +2,8 @@ package com.example.pocketledger.ui.accounts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pocketledger.data.local.entity.AccountEntity
-import com.example.pocketledger.data.local.entity.AccountType
+import com.example.pocketledger.data.model.Account
+import com.example.pocketledger.data.model.AccountType
 import com.example.pocketledger.data.repository.AccountRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +20,7 @@ class AccountsViewModel @Inject constructor(
     private val accountRepository: AccountRepository
 ) : ViewModel() {
 
-    val accounts: StateFlow<List<AccountEntity>> = accountRepository.getAllAccounts()
+    val accounts: StateFlow<List<Account>> = accountRepository.getAllAccounts()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _uiState = MutableStateFlow(AccountsUiState())
@@ -53,7 +53,7 @@ class AccountsViewModel @Inject constructor(
         val balance = if (state.newAccountBalance.isBlank()) BigDecimal.ZERO else BigDecimal(state.newAccountBalance)
 
         viewModelScope.launch {
-            val account = AccountEntity(
+            val account = Account(
                 name = state.newAccountName,
                 type = state.newAccountType,
                 balance = balance

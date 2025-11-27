@@ -15,7 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import com.example.pocketledger.data.local.entity.AccountEntity
+import com.example.pocketledger.data.model.Account
 import java.math.BigDecimal
 
 @Composable
@@ -42,9 +42,9 @@ fun AmountInput(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountSelector(
-    accounts: List<AccountEntity>,
-    selectedAccount: AccountEntity?,
-    onAccountSelected: (AccountEntity) -> Unit,
+    accounts: List<Account>,
+    selectedAccount: Account?,
+    onAccountSelected: (Account) -> Unit,
     modifier: Modifier = Modifier,
     label: String = "Account"
 ) {

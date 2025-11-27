@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.pocketledger.data.local.entity.TransactionEntity
+import com.example.pocketledger.data.model.Transaction
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -136,7 +136,7 @@ fun DashboardScreen(
 }
 
 @Composable
-fun TransactionItem(transaction: TransactionEntity) {
+fun TransactionItem(transaction: Transaction) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)

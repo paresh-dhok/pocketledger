@@ -2,7 +2,7 @@ package com.example.pocketledger.data.repository
 
 import android.content.Context
 import android.net.Uri
-import com.example.pocketledger.data.local.AppDatabase
+import com.example.pocketledger.data.database.AppDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

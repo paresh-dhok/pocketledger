@@ -27,7 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.pocketledger.data.local.entity.TransactionDirection
+import com.example.pocketledger.data.model.TransactionDirection
 import com.example.pocketledger.ui.common.AccountSelector
 import com.example.pocketledger.ui.common.AmountInput
 import com.example.pocketledger.ui.common.DateTimePicker

@@ -37,8 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.pocketledger.data.local.entity.AccountEntity
-import com.example.pocketledger.data.local.entity.AccountType
+import com.example.pocketledger.data.model.Account
+import com.example.pocketledger.data.model.AccountType
 import com.example.pocketledger.ui.common.AmountInput
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +93,7 @@ fun AccountsScreen(
 }
 
 @Composable
-fun AccountItem(account: AccountEntity) {
+fun AccountItem(account: Account) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)

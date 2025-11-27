@@ -1,10 +1,10 @@
 package com.example.pocketledger.domain.usecase
 
 import androidx.room.withTransaction
-import com.example.pocketledger.data.local.AppDatabase
-import com.example.pocketledger.data.local.entity.LoanRecordEntity
-import com.example.pocketledger.data.local.entity.TransactionDirection
-import com.example.pocketledger.data.local.entity.TransactionEntity
+import com.example.pocketledger.data.database.AppDatabase
+import com.example.pocketledger.data.model.LoanRecord
+import com.example.pocketledger.data.model.TransactionDirection
+import com.example.pocketledger.data.model.Transaction
 import com.example.pocketledger.data.repository.AccountRepository
 import com.example.pocketledger.data.repository.LoanRepository
 import com.example.pocketledger.data.repository.TransactionRepository
@@ -19,7 +19,7 @@ class LoanSettlementUseCase @Inject constructor(
     private val database: AppDatabase
 ) {
     suspend fun settleLoan(
-        loan: LoanRecordEntity,
+        loan: LoanRecord,
         amount: BigDecimal,
         accountId: java.util.UUID,
         note: String?
@@ -29,11 +29,11 @@ class LoanSettlementUseCase @Inject constructor(
             // If I LENT, and I get paid back -> INCOME
             // If I BORROWED, and I pay back -> EXPENSE
             val direction = when (loan.lenderOrBorrower) {
-                com.example.pocketledger.data.local.entity.LoanType.I_LENT -> TransactionDirection.INCOME
-                com.example.pocketledger.data.local.entity.LoanType.I_BORROWED -> TransactionDirection.EXPENSE
+                LoanRecord.LoanType.I_LENT -> TransactionDirection.INCOME
+                LoanRecord.LoanType.I_BORROWED -> TransactionDirection.EXPENSE
             }
 
-            val transaction = TransactionEntity(
+            val transaction = Transaction(
                 datetime = LocalDateTime.now(),
                 amount = amount,
                 direction = direction,

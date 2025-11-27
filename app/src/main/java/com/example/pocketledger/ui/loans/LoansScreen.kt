@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.pocketledger.data.local.entity.LoanRecordEntity
+import com.example.pocketledger.data.model.LoanRecord
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +64,7 @@ fun LoansScreen(
 }
 
 @Composable
-fun LoanItem(loan: LoanRecordEntity) {
+fun LoanItem(loan: LoanRecord) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)

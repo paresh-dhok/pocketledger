@@ -1,9 +1,9 @@
 package com.example.pocketledger.domain.usecase
 
 import androidx.room.withTransaction
-import com.example.pocketledger.data.local.AppDatabase
-import com.example.pocketledger.data.local.entity.TransactionDirection
-import com.example.pocketledger.data.local.entity.TransactionEntity
+import com.example.pocketledger.data.database.AppDatabase
+import com.example.pocketledger.data.model.TransactionDirection
+import com.example.pocketledger.data.model.Transaction
 import com.example.pocketledger.data.repository.AccountRepository
 import com.example.pocketledger.data.repository.TransactionRepository
 import javax.inject.Inject
@@ -13,7 +13,7 @@ class ProcessTransactionUseCase @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val database: AppDatabase
 ) {
-    suspend operator fun invoke(transaction: TransactionEntity) {
+    suspend operator fun invoke(transaction: Transaction) {
         database.withTransaction {
             // 1. Insert Transaction
             transactionRepository.insertTransaction(transaction)

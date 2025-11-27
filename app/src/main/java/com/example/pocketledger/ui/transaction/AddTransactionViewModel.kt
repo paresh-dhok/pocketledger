@@ -2,9 +2,9 @@ package com.example.pocketledger.ui.transaction
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pocketledger.data.local.entity.AccountEntity
-import com.example.pocketledger.data.local.entity.TransactionDirection
-import com.example.pocketledger.data.local.entity.TransactionEntity
+import com.example.pocketledger.data.model.Account
+import com.example.pocketledger.data.model.TransactionDirection
+import com.example.pocketledger.data.model.Transaction
 import com.example.pocketledger.data.repository.AccountRepository
 import com.example.pocketledger.data.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +25,7 @@ class AddTransactionViewModel @Inject constructor(
     accountRepository: AccountRepository
 ) : ViewModel() {
 
-    val accounts: StateFlow<List<AccountEntity>> = accountRepository.getAllAccounts()
+    val accounts: StateFlow<List<Account>> = accountRepository.getAllAccounts()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _uiState = MutableStateFlow(AddTransactionUiState())
@@ -39,11 +39,11 @@ class AddTransactionViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(direction = direction)
     }
 
-    fun onFromAccountChange(account: AccountEntity) {
+    fun onFromAccountChange(account: Account) {
         _uiState.value = _uiState.value.copy(fromAccount = account)
     }
 
-    fun onToAccountChange(account: AccountEntity) {
+    fun onToAccountChange(account: Account) {
         _uiState.value = _uiState.value.copy(toAccount = account)
     }
 
@@ -68,7 +68,7 @@ class AddTransactionViewModel @Inject constructor(
         if (amountValue <= BigDecimal.ZERO) return
 
         viewModelScope.launch {
-            val transaction = TransactionEntity(
+            val transaction = Transaction(
                 datetime = state.datetime,
                 amount = amountValue,
                 direction = state.direction,
@@ -93,8 +93,8 @@ class AddTransactionViewModel @Inject constructor(
 data class AddTransactionUiState(
     val amount: String = "",
     val direction: TransactionDirection = TransactionDirection.EXPENSE,
-    val fromAccount: AccountEntity? = null,
-    val toAccount: AccountEntity? = null,
+    val fromAccount: Account? = null,
+    val toAccount: Account? = null,
     val category: String = "",
     val note: String = "",
     val datetime: LocalDateTime = LocalDateTime.now()

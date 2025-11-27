@@ -2,8 +2,8 @@ package com.example.pocketledger.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pocketledger.data.local.entity.AccountEntity
-import com.example.pocketledger.data.local.entity.TransactionEntity
+import com.example.pocketledger.data.model.Account
+import com.example.pocketledger.data.model.Transaction
 import com.example.pocketledger.data.repository.AccountRepository
 import com.example.pocketledger.data.repository.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,13 +19,13 @@ import javax.inject.Inject
 class DashboardViewModel @Inject constructor(
     accountRepository: AccountRepository,
     transactionRepository: TransactionRepository,
-    private val debugDataGenerator: com.example.pocketledger.data.DebugDataGenerator
+    private val dataSeeder: com.example.pocketledger.data.seeder.DataSeeder
 ) : ViewModel() {
 
-    val accounts: StateFlow<List<AccountEntity>> = accountRepository.getAllAccounts()
+    val accounts: StateFlow<List<Account>> = accountRepository.getAllAccounts()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val recentTransactions: StateFlow<List<TransactionEntity>> = transactionRepository.getAllTransactions()
+    val recentTransactions: StateFlow<List<Transaction>> = transactionRepository.getAllTransactions()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val totalBalance: StateFlow<BigDecimal> = accounts.combine(accounts) { accs, _ ->
@@ -34,7 +34,7 @@ class DashboardViewModel @Inject constructor(
 
     fun generateSampleData() {
         viewModelScope.launch {
-            debugDataGenerator.generateSampleData()
+            dataSeeder.seedData()
         }
     }
 }
